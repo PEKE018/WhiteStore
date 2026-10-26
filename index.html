@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda White Label</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Tienda online con pedidos por WhatsApp">
+</head>
+<body>
+    <div id="app">
+        <!-- Encabezado -->
+        <header class="store-header">
+            <div class="header-content">
+                <div class="logo-area">
+                    <div id="store-logo" class="logo-placeholder"></div>
+                    <div>
+                        <h1 id="store-name">Nombre de la Tienda</h1>
+                        <p id="store-desc" class="store-description">Descripción del negocio</p>
+                    </div>
+                </div>
+                <button id="cart-btn" class="btn btn-primary cart-trigger" aria-label="Abrir carrito">
+                    Carrito <span id="cart-count" class="badge">0</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Controles de búsqueda y filtro -->
+        <section class="controls-section">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Buscar productos..." aria-label="Buscar productos">
+            </div>
+            <div class="filters-bar">
+                <select id="sort-select" aria-label="Ordenar productos">
+                    <option value="default">Orden predeterminado</option>
+                    <option value="price-asc">Precio: Menor a Mayor</option>
+                    <option value="price-desc">Precio: Mayor a Menor</option>
+                    <option value="alpha">Alfabético (A-Z)</option>
+                </select>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="filter-promo"> Solo Promociones
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="filter-featured"> Destacados
+                </label>
+            </div>
+        </section>
+
+        <!-- Categorías -->
+        <nav id="categories-nav" class="categories-nav" aria-label="Categorías de productos">
+            <!-- Se genera dinámicamente -->
+        </nav>
+
+        <!-- Catálogo -->
+        <main>
+            <div class="catalog-heading">
+                <h2>Catálogo</h2>
+            </div>
+            <div id="products-grid" class="products-grid">
+                <!-- Se genera dinámicamente -->
+            </div>
+            <div id="empty-state" class="empty-state hidden">
+                <p>No se encontraron productos que coincidan con tu búsqueda.</p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="store-footer">
+            <p id="footer-info">© <span id="current-year"></span> <span id="footer-store-name">Tienda</span>. Todos los derechos reservados.</p>
+            <button id="open-admin-btn" class="btn btn-text">Panel Administrativo</button>
+        </footer>
+    </div>
+
+    <!-- Modal del Carrito -->
+    <div id="cart-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+        <div class="modal-content cart-content">
+            <div class="modal-header">
+                <h2 id="cart-title">Tu Carrito</h2>
+                <button class="close-modal" aria-label="Cerrar carrito">&times;</button>
+            </div>
+            <div id="cart-items" class="cart-items">
+                <!-- Items del carrito -->
+            </div>
+            <div id="cart-empty" class="empty-state hidden">
+                <p>Tu carrito está vacío.</p>
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total-amount" class="total-amount">$0.00</span>
+                </div>
+                <div class="cart-actions">
+                    <button id="clear-cart-btn" class="btn btn-secondary">Vaciar</button>
+                    <button id="checkout-btn" class="btn btn-primary">Finalizar Pedido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Checkout (Formulario WhatsApp) -->
+    <div id="checkout-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="checkout-title">Finalizar Pedido</h2>
+                <button class="close-modal" aria-label="Cerrar formulario">&times;</button>
+            </div>
+            <form id="checkout-form" class="checkout-form">
+                <div class="form-group">
+                    <label for="customer-name">Nombre completo *</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone">Teléfono (opcional)</label>
+                    <input type="tel" id="customer-phone">
+                </div>
+                <div class="form-group">
+                    <label for="delivery-mode">Modalidad de entrega *</label>
+                    <select id="delivery-mode" required>
+                        <option value="retiro">Retiro en local</option>
+                        <option value="envio">Envío a domicilio</option>
+                    </select>
+                </div>
+                <div class="form-group hidden" id="address-group">
+                    <label for="customer-address">Dirección de entrega *</label>
+                    <input type="text" id="customer-address">
+                </div>
+                <div class="form-group">
+                    <label for="payment-method">Método de pago preferido *</label>
+                    <select id="payment-method" required>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia bancaria</option>
+                        <option value="tarjeta">Tarjeta (al entregar/retirar)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="order-comments">Comentarios adicionales</label>
+                    <textarea id="order-comments" rows="3"></textarea>
+                </div>
+                <div class="checkout-summary">
+                    <p>Total a pagar: <strong id="checkout-total">$0.00</strong></p>
+                    <p class="disclaimer">Al hacer clic en "Enviar por WhatsApp", se abrirá la aplicación. Debes enviar el mensaje manualmente para confirmar el pedido.</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Enviar por WhatsApp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal del Panel Administrativo -->
+    <div id="admin-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+        <div class="modal-content admin-content">
+            <div class="modal-header">
+                <h2 id="admin-title">Panel Administrativo</h2>
+                <button class="close-modal" aria-label="Cerrar panel">&times;</button>
+            </div>
+            <div class="admin-warning">
+                ⚠️ <strong>Advertencia:</strong> Este panel es solo para demostración local. Los datos se guardan en tu navegador (localStorage). No es seguro para producción ni protege contra modificaciones malintencionadas.
+            </div>
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="admin-products">Productos</button>
+                <button class="tab-btn" data-tab="admin-categories">Categorías</button>
+                <button class="tab-btn" data-tab="admin-config">Configuración</button>
+                <button class="tab-btn" data-tab="admin-data">Datos</button>
+            </div>
+            
+            <div id="admin-products" class="tab-content active">
+                <div class="admin-actions">
+                    <input type="text" id="admin-search" placeholder="Buscar producto...">
+                    <button id="add-product-btn" class="btn btn-primary">Nuevo Producto</button>
+                </div>
+                <div id="admin-products-list" class="admin-list"></div>
+            </div>
+
+            <div id="admin-categories" class="tab-content">
+                <form id="category-form" class="admin-form">
+                    <input type="hidden" id="cat-id">
+                    <div class="form-group">
+                        <label>Nombre de categoría *</label>
+                        <input type="text" id="cat-name" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Categoría</button>
+                        <button type="button" id="cancel-cat-btn" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </form>
+                <div id="admin-categories-list" class="admin-list"></div>
+            </div>
+
+            <div id="admin-config" class="tab-content">
+                <form id="config-form" class="admin-form">
+                    <div class="form-group">
+                        <label>Nombre del negocio</label>
+                        <input type="text" id="cfg-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" id="cfg-desc">
+                    </div>
+                    <div class="form-group">
+                        <label>Número de WhatsApp (con código de país, ej: 5491112345678)</label>
+                        <input type="text" id="cfg-whatsapp" required pattern="[0-9]+">
+                    </div>
+                    <div class="form-group">
+                        <label>Moneda (símbolo)</label>
+                        <input type="text" id="cfg-currency" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Color Principal (Hex)</label>
+                        <input type="color" id="cfg-color-primary">
+                    </div>
+                    <div class="form-group">
+                        <label>Color Secundario (Hex)</label>
+                        <input type="color" id="cfg-color-secondary">
+                    </div>
+                    <div class="form-group">
+                        <label for="cfg-font">Tipografía</label>
+                        <select id="cfg-font">
+                            <option value="system">Neutra</option>
+                            <option value="editorial">Editorial</option>
+                            <option value="humanist">Cercana</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cfg-style">Estilo de bordes</label>
+                        <select id="cfg-style">
+                            <option value="minimal">Recto</option>
+                            <option value="soft">Suave</option>
+                            <option value="rounded">Redondeado</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="admin-data" class="tab-content">
+                <div class="data-actions">
+                    <button id="export-data-btn" class="btn btn-secondary">Exportar JSON</button>
+                    <label class="btn btn-secondary">
+                        Importar JSON
+                        <input type="file" id="import-file" accept=".json" hidden>
+                    </label>
+                    <button id="reset-data-btn" class="btn btn-danger">Restaurar Datos de Demostración</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición de Producto -->
+    <div id="product-form-modal" class="modal hidden" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="product-form-title">Editar Producto</h2>
+                <button class="close-modal" aria-label="Cerrar">&times;</button>
+            </div>
+            <form id="product-form" class="admin-form">
+                <input type="hidden" id="prod-id">
+                <div class="form-group">
+                    <label>Nombre *</label>
+                    <input type="text" id="prod-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="prod-desc" rows="2"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría *</label>
+                        <select id="prod-category" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Unidad de venta</label>
+                        <input type="text" id="prod-unit" placeholder="ej: kg, un, lt" value="un">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Precio *</label>
+                        <input type="number" id="prod-price" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Promocional</label>
+                        <input type="number" id="prod-promo-price" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Imagen URL</label>
+                        <input type="url" id="prod-image" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="prod-status">
+                            <option value="active">Activo</option>
+                            <option value="out_of_stock">Agotado</option>
+                            <option value="hidden">Oculto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="prod-featured"> Producto Destacado
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary close-modal-btn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contenedor de Notificaciones (Toasts) -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
